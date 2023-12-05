@@ -216,10 +216,10 @@ exports.genre = (req, res) => {
       let genreList = [];
       element.find("li > a").each(function (i, el) {
         let object = {};
-        object.genre_name = $(el).text();
-        object.id = $(el).attr("href").replace("/genres/", "");
-        object.link = baseUrl + $(el).attr("href");
-        object.image_link = ImageList[i];
+        object.genre_title = $(el).text();
+        object.genre_id = $(el).attr("href").replace("/genres/", "").replace("/", "");
+        object.genre_link = baseUrl + $(el).attr("href");
+        //object.image_link = ImageList[i];
         genreList.push(object);
       });
       res.json({ genreList });
@@ -240,7 +240,7 @@ exports.animeByGenre = (req, res) => {
       let animeList = [];
       let genreList = [];
       let object = {};
-      let genre_name, genre_link, genre_id;
+      let genre_title, genre_link, genre_id;
       element.find(".col-md-4").each(function () {
         object = {};
         object.anime_name = $(this).find(".col-anime-title").text();
@@ -249,7 +249,7 @@ exports.animeByGenre = (req, res) => {
         object.id = $(this)
           .find(".col-anime-title > a")
           .attr("href")
-          .replace("https://otakudesu.tv/anime/", "");
+          .replace("https://otakudesu.cam/anime/", "");
         object.studio = $(this).find(".col-anime-studio").text();
         object.episode = $(this).find(".col-anime-eps").text();
         object.score = parseFloat($(this).find(".col-anime-rating").text());
@@ -258,10 +258,10 @@ exports.animeByGenre = (req, res) => {
         $(this)
           .find(".col-anime-genre > a")
           .each(function () {
-            genre_name = $(this).text();
+            genre_title = $(this).text();
             genre_link = $(this).attr("href");
             genre_id = genre_link.replace("https://otakudesu.tv/genres/", "");
-            genreList.push({ genre_name, genre_link, genre_id });
+            genreList.push({ genre_title, genre_link, genre_id });
             object.genre_list = genreList;
           });
         animeList.push(object);

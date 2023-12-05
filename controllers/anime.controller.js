@@ -5,6 +5,7 @@ const errors = require("../helpers/errors");
 const episodeHelper = require("../helpers/episodeHelper");
 const {baseUrl} = require("../helpers/base-url");
 const e = require("express");
+const request = require("request");
 
 exports.detailAnime = async (req, res) => {
   const id = req.params.id;
@@ -20,7 +21,7 @@ exports.detailAnime = async (req, res) => {
     let episode_list = [];
     object.thumb = detailElement.find("img").attr("src");
     object.anime_id = req.params.id;
-    let genre_name, genre_id, genre_link;
+    let genre_title, genre_id, genre_link;
     let genreList = [];
 
     object.synopsis = $("#venkonten > div.venser > div.fotoanime > div.sinopc")
@@ -88,12 +89,12 @@ exports.detailAnime = async (req, res) => {
         .eq(10)
         .find("span > a")
         .each(function () {
-          genre_name = $(this).text();
+          genre_title = $(this).text();
           genre_id = $(this)
             .attr("href")
-            .replace(`https://otakudesu.moe/genres/`, "");
+            .replace(`https://otakudesu.cam/genres/`, "");
           genre_link = $(this).attr("href");
-          genreList.push({ genre_name, genre_id, genre_link });
+          genreList.push({ genre_title, genre_id, genre_link });
           object.genre_list = genreList;
         });
     });
@@ -105,7 +106,7 @@ exports.detailAnime = async (req, res) => {
           id: $(element)
             .find("span > a")
             .attr("href")
-            .replace('https://otakudesu.moe/', ""),
+            .replace('https://otakudesu.cam/episode/', ""),
           link: $(element).find("span > a").attr("href"),
           uploaded_on: $(element).find(".zeebr").text(),
         };
@@ -128,7 +129,7 @@ exports.detailAnime = async (req, res) => {
         $("div.venser > div:nth-child(6) > ul").text().length !== 0
           ? $("div.venser > div:nth-child(6) > ul > li > span:nth-child(1) > a")
               .attr("href")
-              .replace(`https://otakudesu.moe/batch/`, "")
+              .replace(`https://otakudesu.cam/batch/`, "")
           : "Masih kosong gan",
       link:
         $("div.venser > div:nth-child(6) > ul").text().length !== 0
@@ -172,7 +173,7 @@ exports.batchAnime = async (req, res) => {
 };
 exports.epsAnime = async (req, res) => {
   const id = req.params.id;
-  const fullUrl = `${url.baseUrl}${id}`;
+  const fullUrl = `${url.baseUrl}episode/${id}`;
   try {
     const response = await Axios.get(fullUrl);
     const $ = cheerio.load(response.data);
@@ -182,15 +183,18 @@ exports.epsAnime = async (req, res) => {
     obj.baseUrl = fullUrl;
     obj.id = fullUrl.replace(url.baseUrl, "");
     const streamLink = streamElement.find("iframe").attr("src");
-    // const streamLinkResponse = await Axios.get(streamLink)
-    // const stream$ = cheerio.load(streamLinkResponse.data)
-    // const sl = stream$('body').find('script').html().search('sources')
-    // const endIndex = stream$('body').find('script').eq(0).html().indexOf('}]',sl)
-    // const val = stream$('body').find('script').eq(0).html().substr(sl,endIndex - sl+1).replace(`sources: [{'file':'`,'')
-    // console.log(val);
-    // console.log(val.replace(`','type':'video/mp4'}`,''));
-    obj.link_stream = await episodeHelper.get(streamLink);
-    console.log($('#pembed > div > iframe').attr('src'));
+
+    const streamLinkResponse = await Axios.get(streamLink)
+    const stream$ = cheerio.load(streamLinkResponse.data)
+    const sl = stream$('body').find('script').html().search('sources')
+    const endIndex = stream$('body').find('script').eq(0).html().indexOf('}]',sl)
+    const val = stream$('body').find('script').eq(0).html().substr(sl,endIndex - sl+1).replace(`sources: [{'file':'`,'')
+    console.log(val);
+    //console.log(val.replace(`','type':'video/mp4'}`,''));
+    
+    //obj.link_stream = await episodeHelper.get(streamLink);
+    obj.link_stream = streamLink
+    //console.log($('#pembed > div > iframe').attr('src'));
     let low_quality;
     let medium_quality;
     let high_quality;
